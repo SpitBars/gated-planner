@@ -1,147 +1,259 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>GatePlan</title>
-  <meta name="theme-color" content="#0F4C81">
+  <meta name="theme-color" content="#101828">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="stylesheet" href="styles.css">
-  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
-  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+  <link rel="apple-touch-icon" href="icon-192.png">
 </head>
 <body>
-  <header class="topbar">
-    <h1>GatePlan</h1>
-    <nav>
-      <button id="tab-plan" class="tab active">Morning Plan</button>
-      <button id="tab-today" class="tab">Today</button>
-      <button id="tab-pool" class="tab">Task Pool</button>
-      <button id="tab-checkin" class="tab">Evening Check-in</button>
-      <button id="tab-settings" class="tab">Settings</button>
+  <div id="app-shell">
+    <header class="app-header" role="banner">
+      <div class="brand">
+        <span class="logo">⏳</span>
+        <div>
+          <h1>GatePlan</h1>
+          <p class="tagline">Intentional days start here</p>
+        </div>
+      </div>
+      <div class="header-meta">
+        <span id="dateInfo" class="date"></span>
+        <span id="streakInfo" class="streak">Streak: 0 🔥</span>
+      </div>
+      <button id="installBtn" class="ghost hidden" type="button">Install</button>
+    </header>
+
+    <!-- Persistent offline indicator for upgraded PWA feedback -->
+    <div id="offlineBanner" class="offline-banner" role="status" aria-live="polite">
+      <span class="dot"></span>
+      <span id="offlineText">Working offline</span>
+    </div>
+
+    <nav class="tab-bar" role="tablist" aria-label="GatePlan views">
+      <button class="tab-button active" id="tab-plan" role="tab" aria-selected="true" aria-controls="view-plan">Plan</button>
+      <button class="tab-button" id="tab-today" role="tab" aria-controls="view-today">Today</button>
+      <button class="tab-button" id="tab-pool" role="tab" aria-controls="view-pool">Task Pool</button>
+      <button class="tab-button" id="tab-checkin" role="tab" aria-controls="view-checkin">Check-in</button>
+      <button class="tab-button" id="tab-review" role="tab" aria-controls="view-review">Weekly Review</button>
+      <button class="tab-button" id="tab-settings" role="tab" aria-controls="view-settings">Settings</button>
     </nav>
-  </header>
 
-  <main>
-    <!-- Gate Overlay -->
-    <section id="gate" class="overlay hidden">
-      <div class="card">
-        <h2>Good morning 👋</h2>
-        <p>Before anything else, plan at least one task for today.</p>
-        <button id="gateGo">Open Morning Planner</button>
-      </div>
-    </section>
-
-    <!-- Morning Plan -->
-    <section id="view-plan" class="view visible">
-      <div class="card">
-        <h2>Plan your day</h2>
-        <div class="row">
-          <label>Pick a task from pool:</label>
-          <select id="planTaskSelect"></select>
+    <main class="views" role="main">
+      <!-- Morning gate overlay keeps the habit strong -->
+      <section id="gate" class="overlay hidden" aria-hidden="true">
+        <div class="overlay-card" role="dialog" aria-modal="true" aria-labelledby="gateTitle">
+          <h2 id="gateTitle">Morning gate</h2>
+          <p>Plan at least <strong id="minTaskRequirement">one task</strong> before the day begins.</p>
+          <button id="gateGo" class="primary" type="button">Plan today’s focus</button>
         </div>
-        <div class="row">
-          <label>Start time</label>
-          <input type="time" id="planStartTime">
-        </div>
-        <div class="row">
-          <label>Duration (min)</label>
-          <input type="number" id="planDuration" min="5" step="5" placeholder="30">
-        </div>
-        <button id="addToToday">Add to Today</button>
-      </div>
+      </section>
 
-      <div class="card">
-        <h3>Today’s Plan</h3>
-        <ul id="todayPlanList"></ul>
-        <div class="row">
-          <button id="finishPlanning" class="primary">Finish planning ✅</button>
+      <!-- Plan view -->
+      <section id="view-plan" class="view visible" role="tabpanel" aria-labelledby="tab-plan">
+        <div class="card intro">
+          <h2>Plan your deep work</h2>
+          <p class="muted">Grab tasks from your pool, set the intention, and lock in today’s focus.</p>
         </div>
-      </div>
-    </section>
+        <div class="card">
+          <form id="planForm" class="responsive-grid" autocomplete="off">
+            <label class="field">
+              <span class="label">Pick a task</span>
+              <select id="planTaskSelect"></select>
+            </label>
+            <label class="field">
+              <span class="label">Start time</span>
+              <input type="time" id="planStartTime">
+            </label>
+            <label class="field">
+              <span class="label">Duration (min)</span>
+              <input type="number" id="planDuration" min="5" step="5" placeholder="30">
+            </label>
+            <div class="field add-actions">
+              <button id="addToToday" class="primary" type="button">Add to today</button>
+            </div>
+          </form>
+        </div>
 
-    <!-- Today -->
-    <section id="view-today" class="view">
-      <div class="card">
-        <h2>Today</h2>
-        <ul id="todayLiveList"></ul>
-      </div>
-    </section>
-
-    <!-- Task Pool -->
-    <section id="view-pool" class="view">
-      <div class="card">
-        <h2>Task pool</h2>
-        <div class="grid2">
-          <div>
-            <label>Title</label>
-            <input id="poolTitle" placeholder="e.g., 30 min reading">
-          </div>
-          <div>
-            <label>Default duration (min)</label>
-            <input id="poolDuration" type="number" min="5" step="5" placeholder="30">
+        <div class="card">
+          <header class="card-header">
+            <div>
+              <h3>Today’s plan</h3>
+              <p class="muted" id="planSummary">No tasks yet.</p>
+            </div>
+            <div class="progress-pill" aria-live="polite">
+              <span id="planProgressLabel">0/0</span>
+              <div class="progress-track" aria-hidden="true">
+                <div id="planProgressBar" class="progress-fill" style="width:0%"></div>
+              </div>
+            </div>
+          </header>
+          <ul id="todayPlanList" class="list"></ul>
+          <div class="card-actions">
+            <button id="finishPlanning" class="primary" type="button">Lock plan ✅</button>
           </div>
         </div>
-        <div class="grid2">
-          <div>
-            <label>Due date (optional)</label>
-            <input id="poolDue" type="date">
+      </section>
+
+      <!-- Today view -->
+      <section id="view-today" class="view" role="tabpanel" aria-labelledby="tab-today">
+        <div class="card">
+          <header class="card-header">
+            <div>
+              <h2>Today</h2>
+              <p class="muted">Stay on track and celebrate progress.</p>
+            </div>
+            <div class="progress-pill">
+              <span id="todayProgressLabel">0/0</span>
+              <div class="progress-track" aria-hidden="true">
+                <div id="todayProgressBar" class="progress-fill" style="width:0%"></div>
+              </div>
+            </div>
+          </header>
+          <ul id="todayLiveList" class="list"></ul>
+        </div>
+      </section>
+
+      <!-- Task pool view -->
+      <section id="view-pool" class="view" role="tabpanel" aria-labelledby="tab-pool">
+        <div class="card">
+          <h2>Task pool</h2>
+          <p class="muted">Capture repeatable actions so planning stays fast.</p>
+          <form id="poolForm" class="responsive-grid" autocomplete="off">
+            <label class="field">
+              <span class="label">Title</span>
+              <input id="poolTitle" placeholder="e.g., 30 minute reading block">
+            </label>
+            <label class="field">
+              <span class="label">Default duration (min)</span>
+              <input id="poolDuration" type="number" min="5" step="5" placeholder="30">
+            </label>
+            <label class="field">
+              <span class="label">Due date</span>
+              <input id="poolDue" type="date">
+            </label>
+            <label class="field">
+              <span class="label">Tags</span>
+              <input id="poolTags" placeholder="focus, study">
+            </label>
+            <div class="field add-actions">
+              <button id="addPoolTask" class="primary" type="button">Add to pool</button>
+            </div>
+          </form>
+        </div>
+        <div class="card">
+          <h3>Saved tasks</h3>
+          <ul id="poolList" class="list"></ul>
+        </div>
+      </section>
+
+      <!-- Evening check-in -->
+      <section id="view-checkin" class="view" role="tabpanel" aria-labelledby="tab-checkin">
+        <div class="card">
+          <h2>Evening check-in</h2>
+          <p class="muted">Reflect and log why items stuck or slipped. Multiple reasons and notes encouraged.</p>
+          <ul id="checkinList" class="list"></ul>
+          <div class="card section">
+            <label class="field checkbox">
+              <input type="checkbox" id="tomorrowFree">
+              <span>Make tomorrow a free day</span>
+            </label>
           </div>
-          <div>
-            <label>Tags (comma-separated)</label>
-            <input id="poolTags" placeholder="focus, study">
+          <button id="submitCheckin" class="primary" type="button">Submit check-in</button>
+          <p id="checkinResult" class="muted" role="status" aria-live="polite"></p>
+        </div>
+      </section>
+
+      <!-- Weekly review -->
+      <section id="view-review" class="view" role="tabpanel" aria-labelledby="tab-review">
+        <div class="card">
+          <h2>Weekly review</h2>
+          <p class="muted">Zoom out to spot trends, celebrate streaks, and notice blockers.</p>
+          <div class="review-grid">
+            <div class="review-card">
+              <h3>Daily success rate</h3>
+              <ul id="dailySuccessList" class="stat-list"></ul>
+            </div>
+            <div class="review-card">
+              <h3>Top reasons</h3>
+              <ul id="topReasonsList" class="stat-list"></ul>
+            </div>
+            <div class="review-card">
+              <h3>Streak history</h3>
+              <div id="streakSummary" class="streak-summary"></div>
+            </div>
           </div>
         </div>
-        <button id="addPoolTask">Add to pool</button>
-      </div>
+      </section>
 
-      <div class="card">
-        <h3>Pool</h3>
-        <ul id="poolList"></ul>
-      </div>
-    </section>
-
-    <!-- Evening Check-in -->
-    <section id="view-checkin" class="view">
-      <div class="card">
-        <h2>Evening Check-in</h2>
-        <p>Mark each planned item. If not success, pick a reason.</p>
-        <ul id="checkinList"></ul>
-        <div class="row">
-          <label><input type="checkbox" id="tomorrowFree"> Make tomorrow a free day</label>
+      <!-- Settings -->
+      <section id="view-settings" class="view" role="tabpanel" aria-labelledby="tab-settings">
+        <div class="card">
+          <h2>Settings</h2>
+          <div class="settings-grid">
+            <label class="field">
+              <span class="label">Morning gate hour</span>
+              <input type="time" id="morningHour" value="07:00">
+            </label>
+            <label class="field">
+              <span class="label">Minimum tasks required</span>
+              <input type="number" id="minTasks" min="1" max="10" value="1">
+            </label>
+            <label class="field">
+              <span class="label">Calendar links</span>
+              <select id="calLinks">
+                <option value="on">On</option>
+                <option value="off">Off</option>
+              </select>
+            </label>
+            <label class="field">
+              <span class="label">Streak success threshold</span>
+              <select id="streakThreshold">
+                <option value="0.6">60%</option>
+                <option value="0.7">70%</option>
+                <option value="0.8">80%</option>
+                <option value="0.9">90%</option>
+                <option value="1">100%</option>
+              </select>
+            </label>
+            <label class="field">
+              <span class="label">Theme</span>
+              <select id="themeChoice">
+                <option value="system">Follow system</option>
+                <option value="light">Light</option>
+                <option value="dark">Dark</option>
+              </select>
+            </label>
+            <label class="field">
+              <span class="label">Accent color</span>
+              <input type="color" id="accentColor" value="#6366f1">
+            </label>
+          </div>
+          <div class="card-actions">
+            <button id="saveSettings" class="primary" type="button">Save settings</button>
+          </div>
         </div>
-        <button id="submitCheckin" class="primary">Submit Check-in</button>
-        <p id="checkinResult" class="muted"></p>
-      </div>
-    </section>
-
-    <!-- Settings -->
-    <section id="view-settings" class="view">
-      <div class="card">
-        <h2>Settings</h2>
-        <div class="row">
-          <label>Morning gate hour (24h, e.g., 07:00)</label>
-          <input type="time" id="morningHour" value="07:00">
+        <div class="card">
+          <h3>Backup &amp; restore</h3>
+          <p class="muted">Everything stays on your device. Export a backup or bring one back.</p>
+          <div class="card-actions">
+            <button id="exportData" type="button">Export JSON</button>
+            <button id="importData" type="button">Import JSON</button>
+            <input id="importFile" type="file" accept="application/json" hidden>
+          </div>
         </div>
-        <div class="row">
-          <label>Google Calendar link on tasks</label>
-          <select id="calLinks">
-            <option value="on" selected>On</option>
-            <option value="off">Off</option>
-          </select>
-        </div>
-        <button id="saveSettings">Save Settings</button>
-        <p class="muted">Tip: On Android Chrome, tap ⋮ → Add to Home screen to install the app.</p>
-      </div>
-    </section>
-  </main>
+      </section>
+    </main>
 
-  <footer class="footer">
-    <span id="streakInfo">Streak: 0 🔥</span>
-    <span id="dateInfo"></span>
-    <button id="installBtn" class="ghost hidden">Install</button>
-  </footer>
+    <footer class="app-footer" role="contentinfo">
+      <span id="lastSync" class="muted">Local-first, auto-saved</span>
+    </footer>
+  </div>
 
-  <script src="app.js"></script>
+  <canvas id="confettiCanvas" class="confetti hidden" aria-hidden="true"></canvas>
+  <script src="app.js" type="module"></script>
 </body>
 </html>

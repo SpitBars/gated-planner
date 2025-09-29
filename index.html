@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>GatePlan</title>
+  <meta name="theme-color" content="#0F4C81">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+</head>
+<body>
+  <header class="topbar">
+    <h1>GatePlan</h1>
+    <nav>
+      <button id="tab-plan" class="tab active">Morning Plan</button>
+      <button id="tab-today" class="tab">Today</button>
+      <button id="tab-pool" class="tab">Task Pool</button>
+      <button id="tab-checkin" class="tab">Evening Check-in</button>
+      <button id="tab-settings" class="tab">Settings</button>
+    </nav>
+  </header>
+
+  <main>
+    <!-- Gate Overlay -->
+    <section id="gate" class="overlay hidden">
+      <div class="card">
+        <h2>Good morning 👋</h2>
+        <p>Before anything else, plan at least one task for today.</p>
+        <button id="gateGo">Open Morning Planner</button>
+      </div>
+    </section>
+
+    <!-- Morning Plan -->
+    <section id="view-plan" class="view visible">
+      <div class="card">
+        <h2>Plan your day</h2>
+        <div class="row">
+          <label>Pick a task from pool:</label>
+          <select id="planTaskSelect"></select>
+        </div>
+        <div class="row">
+          <label>Start time</label>
+          <input type="time" id="planStartTime">
+        </div>
+        <div class="row">
+          <label>Duration (min)</label>
+          <input type="number" id="planDuration" min="5" step="5" placeholder="30">
+        </div>
+        <button id="addToToday">Add to Today</button>
+      </div>
+
+      <div class="card">
+        <h3>Today’s Plan</h3>
+        <ul id="todayPlanList"></ul>
+        <div class="row">
+          <button id="finishPlanning" class="primary">Finish planning ✅</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Today -->
+    <section id="view-today" class="view">
+      <div class="card">
+        <h2>Today</h2>
+        <ul id="todayLiveList"></ul>
+      </div>
+    </section>
+
+    <!-- Task Pool -->
+    <section id="view-pool" class="view">
+      <div class="card">
+        <h2>Task pool</h2>
+        <div class="grid2">
+          <div>
+            <label>Title</label>
+            <input id="poolTitle" placeholder="e.g., 30 min reading">
+          </div>
+          <div>
+            <label>Default duration (min)</label>
+            <input id="poolDuration" type="number" min="5" step="5" placeholder="30">
+          </div>
+        </div>
+        <div class="grid2">
+          <div>
+            <label>Due date (optional)</label>
+            <input id="poolDue" type="date">
+          </div>
+          <div>
+            <label>Tags (comma-separated)</label>
+            <input id="poolTags" placeholder="focus, study">
+          </div>
+        </div>
+        <button id="addPoolTask">Add to pool</button>
+      </div>
+
+      <div class="card">
+        <h3>Pool</h3>
+        <ul id="poolList"></ul>
+      </div>
+    </section>
+
+    <!-- Evening Check-in -->
+    <section id="view-checkin" class="view">
+      <div class="card">
+        <h2>Evening Check-in</h2>
+        <p>Mark each planned item. If not success, pick a reason.</p>
+        <ul id="checkinList"></ul>
+        <div class="row">
+          <label><input type="checkbox" id="tomorrowFree"> Make tomorrow a free day</label>
+        </div>
+        <button id="submitCheckin" class="primary">Submit Check-in</button>
+        <p id="checkinResult" class="muted"></p>
+      </div>
+    </section>
+
+    <!-- Settings -->
+    <section id="view-settings" class="view">
+      <div class="card">
+        <h2>Settings</h2>
+        <div class="row">
+          <label>Morning gate hour (24h, e.g., 07:00)</label>
+          <input type="time" id="morningHour" value="07:00">
+        </div>
+        <div class="row">
+          <label>Google Calendar link on tasks</label>
+          <select id="calLinks">
+            <option value="on" selected>On</option>
+            <option value="off">Off</option>
+          </select>
+        </div>
+        <button id="saveSettings">Save Settings</button>
+        <p class="muted">Tip: On Android Chrome, tap ⋮ → Add to Home screen to install the app.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <span id="streakInfo">Streak: 0 🔥</span>
+    <span id="dateInfo"></span>
+    <button id="installBtn" class="ghost hidden">Install</button>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

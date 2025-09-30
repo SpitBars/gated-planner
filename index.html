@@ -34,12 +34,12 @@
     </div>
 
     <nav class="tab-bar" role="tablist" aria-label="GatePlan views">
-      <button class="tab-button active" id="tab-plan" role="tab" aria-selected="true" aria-controls="view-plan">Plan</button>
-      <button class="tab-button" id="tab-today" role="tab" aria-controls="view-today">Today</button>
-      <button class="tab-button" id="tab-pool" role="tab" aria-controls="view-pool">Task Pool</button>
-      <button class="tab-button" id="tab-checkin" role="tab" aria-controls="view-checkin">Check-in</button>
-      <button class="tab-button" id="tab-review" role="tab" aria-controls="view-review">Weekly Review</button>
-      <button class="tab-button" id="tab-settings" role="tab" aria-controls="view-settings">Settings</button>
+      <button class="tab-button active" id="tab-plan" type="button" role="tab" aria-selected="true" aria-controls="view-plan" data-tab="plan">Plan</button>
+      <button class="tab-button" id="tab-today" type="button" role="tab" aria-controls="view-today" data-tab="today">Today</button>
+      <button class="tab-button" id="tab-pool" type="button" role="tab" aria-controls="view-pool" data-tab="pool">Task Pool</button>
+      <button class="tab-button" id="tab-checkin" type="button" role="tab" aria-controls="view-checkin" data-tab="checkin">Check-in</button>
+      <button class="tab-button" id="tab-review" type="button" role="tab" aria-controls="view-review" data-tab="review">Weekly Review</button>
+      <button class="tab-button" id="tab-settings" type="button" role="tab" aria-controls="view-settings" data-tab="settings">Settings</button>
     </nav>
 
     <main class="views" role="main">
@@ -53,10 +53,24 @@
       </section>
 
       <!-- Plan view -->
-      <section id="view-plan" class="view visible" role="tabpanel" aria-labelledby="tab-plan">
+      <section id="view-plan" class="view visible" role="tabpanel" aria-labelledby="tab-plan" tabindex="-1">
         <div class="card intro">
           <h2>Plan your deep work</h2>
           <p class="muted">Grab tasks from your pool, set the intention, and lock in today’s focus.</p>
+        </div>
+        <div class="card coach-card">
+          <header class="card-header">
+            <div>
+              <h3>AI planning coach</h3>
+              <p class="muted" id="coachSummary">Let GatePlan study your habits to prime the perfect morning.</p>
+            </div>
+            <div class="card-actions inline">
+              <button id="coachRefresh" type="button">Refresh suggestions</button>
+              <button id="coachApply" class="primary" type="button">Apply to plan</button>
+            </div>
+          </header>
+          <ul id="coachSuggestionList" class="list coach-list"></ul>
+          <div id="coachAlerts" class="coach-alert" role="status" aria-live="polite"></div>
         </div>
         <div class="card">
           <form id="planForm" class="responsive-grid" autocomplete="off">
@@ -96,10 +110,24 @@
             <button id="finishPlanning" class="primary" type="button">Lock plan ✅</button>
           </div>
         </div>
+        <div class="card calendar-card">
+          <header class="card-header">
+            <div>
+              <h3>Calendar sync</h3>
+              <p class="muted" id="calendarSyncSummary">Pull existing events to avoid collisions.</p>
+            </div>
+            <div class="card-actions inline">
+              <button id="calendarImportBtn" type="button">Import calendar</button>
+              <input id="calendarImportFile" type="file" accept="text/calendar" hidden>
+              <button id="calendarAutoAdjust" type="button">Auto-adjust plan</button>
+            </div>
+          </header>
+          <ul id="calendarConflictList" class="list"></ul>
+        </div>
       </section>
 
       <!-- Today view -->
-      <section id="view-today" class="view" role="tabpanel" aria-labelledby="tab-today">
+      <section id="view-today" class="view" role="tabpanel" aria-labelledby="tab-today" tabindex="-1">
         <div class="card">
           <header class="card-header">
             <div>
@@ -114,11 +142,44 @@
             </div>
           </header>
           <ul id="todayLiveList" class="list"></ul>
+          <div id="focusEffortStats" class="focus-effort" aria-live="polite"></div>
+        </div>
+        <div class="card focus-card">
+          <header class="card-header">
+            <div>
+              <h3>Focus timer</h3>
+              <p class="muted">Track real effort and feed the live dashboard automatically.</p>
+            </div>
+            <div class="badge" id="focusTimerMode">Pomodoro 25:5</div>
+          </header>
+          <div class="focus-timer-grid">
+            <label class="field">
+              <span class="label">Task to focus on</span>
+              <select id="focusTimerTask"></select>
+            </label>
+            <div class="timer-display" id="focusTimerDisplay">00:00</div>
+            <div class="card-actions inline">
+              <button id="focusTimerStart" class="primary" type="button">Start</button>
+              <button id="focusTimerPause" type="button">Pause</button>
+              <button id="focusTimerReset" type="button">Log session</button>
+            </div>
+          </div>
+          <ul id="focusTimerLog" class="list focus-log"></ul>
+        </div>
+        <div class="card gamification-card">
+          <header class="card-header">
+            <div>
+              <h3>Momentum &amp; rewards</h3>
+              <p class="muted">Level up streak mastery with badges and seasonal quests.</p>
+            </div>
+            <div class="badge" id="gamificationLevel">Lvl 1</div>
+          </header>
+          <div id="gamificationSummary" class="gamification-summary"></div>
         </div>
       </section>
 
       <!-- Task pool view -->
-      <section id="view-pool" class="view" role="tabpanel" aria-labelledby="tab-pool">
+      <section id="view-pool" class="view" role="tabpanel" aria-labelledby="tab-pool" tabindex="-1">
         <div class="card">
           <h2>Task pool</h2>
           <p class="muted">Capture repeatable actions so planning stays fast.</p>
@@ -151,10 +212,33 @@
       </section>
 
       <!-- Evening check-in -->
-      <section id="view-checkin" class="view" role="tabpanel" aria-labelledby="tab-checkin">
+      <section id="view-checkin" class="view" role="tabpanel" aria-labelledby="tab-checkin" tabindex="-1">
         <div class="card">
           <h2>Evening check-in</h2>
           <p class="muted">Reflect and log why items stuck or slipped. Multiple reasons and notes encouraged.</p>
+          <div class="card section signal-section">
+            <h3>Daily signals</h3>
+            <div class="responsive-grid">
+              <label class="field">
+                <span class="label">Energy</span>
+                <input type="range" id="energyLevel" min="1" max="5" value="3">
+                <span class="muted" id="energyLabel">Balanced</span>
+              </label>
+              <label class="field">
+                <span class="label">Mood</span>
+                <select id="moodState">
+                  <option value="uplifted">Uplifted</option>
+                  <option value="steady">Steady</option>
+                  <option value="stressed">Stressed</option>
+                  <option value="fatigued">Fatigued</option>
+                </select>
+              </label>
+              <label class="field">
+                <span class="label">Biometrics / wearable note</span>
+                <input id="biometricInput" placeholder="HRV 72, sleep 7h, steps 9k">
+              </label>
+            </div>
+          </div>
           <ul id="checkinList" class="list"></ul>
           <div class="card section">
             <label class="field checkbox">
@@ -164,11 +248,12 @@
           </div>
           <button id="submitCheckin" class="primary" type="button">Submit check-in</button>
           <p id="checkinResult" class="muted" role="status" aria-live="polite"></p>
+          <div id="signalInsight" class="signal-insight"></div>
         </div>
       </section>
 
       <!-- Weekly review -->
-      <section id="view-review" class="view" role="tabpanel" aria-labelledby="tab-review">
+      <section id="view-review" class="view" role="tabpanel" aria-labelledby="tab-review" tabindex="-1">
         <div class="card">
           <h2>Weekly review</h2>
           <p class="muted">Zoom out to spot trends, celebrate streaks, and notice blockers.</p>
@@ -185,12 +270,32 @@
               <h3>Streak history</h3>
               <div id="streakSummary" class="streak-summary"></div>
             </div>
+            <div class="review-card">
+              <h3>Predictive trends</h3>
+              <ul id="predictiveList" class="stat-list"></ul>
+            </div>
+            <div class="review-card">
+              <h3>Personalized coaching</h3>
+              <ul id="coachTipsList" class="stat-list"></ul>
+            </div>
+            <div class="review-card">
+              <h3>Anomaly alerts</h3>
+              <ul id="anomalyList" class="stat-list"></ul>
+            </div>
+            <div class="review-card">
+              <h3>Signal correlations</h3>
+              <ul id="signalCorrelationList" class="stat-list"></ul>
+            </div>
+            <div class="review-card">
+              <h3>Focus vs schedule</h3>
+              <ul id="focusDriftList" class="stat-list"></ul>
+            </div>
           </div>
         </div>
       </section>
 
       <!-- Settings -->
-      <section id="view-settings" class="view" role="tabpanel" aria-labelledby="tab-settings">
+      <section id="view-settings" class="view" role="tabpanel" aria-labelledby="tab-settings" tabindex="-1">
         <div class="card">
           <h2>Settings</h2>
           <div class="settings-grid">
@@ -230,6 +335,25 @@
             <label class="field">
               <span class="label">Accent color</span>
               <input type="color" id="accentColor" value="#6366f1">
+            </label>
+            <label class="field">
+              <span class="label">Enable coach auto-reshuffle</span>
+              <select id="autoReshuffle">
+                <option value="on">On</option>
+                <option value="off">Off</option>
+              </select>
+            </label>
+            <label class="field">
+              <span class="label">Pomodoro length (minutes)</span>
+              <input type="number" id="pomodoroLength" min="10" max="60" value="25">
+            </label>
+            <label class="field">
+              <span class="label">Short break (minutes)</span>
+              <input type="number" id="shortBreakLength" min="3" max="20" value="5">
+            </label>
+            <label class="field">
+              <span class="label">Long break (minutes)</span>
+              <input type="number" id="longBreakLength" min="5" max="30" value="15">
             </label>
           </div>
           <div class="card-actions">
